@@ -1,0 +1,842 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dolki Kabana — WebApp</title>
+  <!-- Telegram WebApp SDK -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    /*
+     * Theme variables for quick colour tweaks.
+     */
+    :root {
+      --bg: #0c0c0d;
+      --panel: #151516;
+      --panel2: #1b1c1d;
+      --text: #f1f1f3;
+      --muted: #b9bcc4;
+      --accent: #e51e2a;
+      --accent2: #ff4d2d;
+      --cream: #f3e7cf;
+      --ring: rgba(255,255,255,0.08);
+      --rad: 18px;
+      --shadow: 0 10px 30px rgba(0,0,0,0.45);
+    }
+
+    * { box-sizing: border-box; }
+    html,body { height: 100%; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, Segoe UI, Inter, Roboto, Arial, sans-serif;
+    }
+    a { color: inherit; text-decoration: none; }
+    button { cursor: pointer; }
+    .wrap {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 14px 14px 110px;
+    }
+
+    /* Hero section */
+    .hero {
+      border-radius: calc(var(--rad) + 6px);
+      background:
+        radial-gradient(900px 500px at right -100px top -200px, rgba(229,30,42,0.12), transparent 60%),
+        var(--panel);
+      border: 1px solid var(--ring);
+      box-shadow: var(--shadow);
+      padding: 18px;
+    }
+    .hero-row {
+      display: flex;
+      gap: 18px;
+      align-items: center;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .mark {
+      width: 36px;
+      height: 36px;
+      border-radius: 9px;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-weight: 900;
+      background: linear-gradient(145deg, var(--accent), var(--accent2));
+      box-shadow: 0 6px 18px rgba(229,30,42,0.35);
+    }
+    .brand-title {
+      font-weight: 900;
+      letter-spacing: .4px;
+      color: var(--cream);
+      font-size: 20px;
+    }
+    .h1 {
+      margin: 8px 0 6px;
+      font-size: 28px;
+      line-height: 1.1;
+      font-weight: 900;
+      color: var(--cream);
+    }
+    .sub {
+      opacity: .9;
+      font-size: 13px;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid var(--accent);
+      color: #fff;
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-weight: 800;
+      margin-top: 10px;
+      background: linear-gradient(180deg, rgba(229,30,42,0.15), transparent);
+    }
+    /* Visual: single image used as background */
+    .hero-visual {
+      margin-left: auto;
+      width: 220px;
+      height: 260px;
+      border-radius: 16px;
+      border: 1px solid var(--ring);
+      overflow: hidden;
+      background: url('./assets/boar-full.png') center top / cover no-repeat;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.5);
+    }
+    @media (max-width: 720px) {
+      .hero-row {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .hero-visual {
+        width: 100%;
+        height: 340px;
+      }
+    }
+
+    /* Controls */
+    .controls {
+      display: flex;
+      gap: 10px;
+      margin-top: 14px;
+    }
+    .input {
+      flex: 1;
+      background: var(--panel2);
+      border: 1px solid var(--ring);
+      border-radius: 12px;
+      padding: 10px 12px;
+      color: var(--text);
+    }
+    .select {
+      background: var(--panel2);
+      border: 1px solid var(--ring);
+      border-radius: 12px;
+      padding: 10px 12px;
+      color: var(--text);
+    }
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .tab {
+      flex: 1;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      justify-content: center;
+      background: var(--panel2);
+      border: 1px solid var(--ring);
+      border-radius: 14px;
+      padding: 10px 12px;
+      font-weight: 800;
+      color: var(--muted);
+    }
+    .tab.active {
+      outline: 2px solid rgba(229,30,42,0.25);
+      color: #fff;
+    }
+
+    /* Grid */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 16px;
+    }
+    @media (max-width: 720px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    .card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.05)), var(--panel);
+      border: 1px solid var(--ring);
+      border-radius: var(--rad);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+    }
+    .media {
+      position: relative;
+      height: 210px;
+      overflow: hidden;
+    }
+    .media img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      filter: contrast(1.05) saturate(1.05);
+    }
+    .badge {
+      position: absolute;
+      left: 10px;
+      top: 10px;
+      font-size: 11px;
+      padding: 6px 9px;
+      border-radius: 999px;
+      background: rgba(12,12,13,0.6);
+      border: 1px solid var(--ring);
+      backdrop-filter: blur(6px);
+    }
+    .fav {
+      position: absolute;
+      right: 10px;
+      top: 10px;
+      width: 36px;
+      height: 36px;
+      border-radius: 12px;
+      border: 1px solid var(--ring);
+      background: rgba(12,12,13,0.6);
+      display: grid;
+      place-items: center;
+    }
+    .fav.active {
+      outline: 2px solid rgba(255,77,45,0.35);
+    }
+    .body {
+      padding: 14px;
+    }
+    .title {
+      font-weight: 900;
+      font-size: 18px;
+    }
+    .price {
+      color: var(--accent2);
+      font-weight: 900;
+      margin-top: 6px;
+    }
+    .small {
+      font-size: 12px;
+      opacity: .9;
+    }
+    .muted {
+      color: var(--muted);
+    }
+    .row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .grow {
+      flex: 1;
+    }
+    .qty {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid var(--ring);
+      border-radius: 12px;
+      padding: 6px 10px;
+      background: var(--panel2);
+    }
+    .qty button {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      border: 1px solid var(--ring);
+      background: #111;
+      color: #fff;
+    }
+    .btn {
+      border: none;
+      padding: 10px 12px;
+      border-radius: 12px;
+      font-weight: 900;
+      background: linear-gradient(145deg, var(--accent), var(--accent2));
+      color: #fff;
+      box-shadow: 0 8px 20px rgba(229,30,42,0.35);
+    }
+    .btn:active {
+      transform: translateY(1px);
+    }
+
+    /* Drawer Cart */
+    .drawer {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      pointer-events: none;
+    }
+    .overlay {
+      position: absolute;
+      inset: 0;
+      background: #0008;
+      opacity: 0;
+      transition: .2s;
+    }
+    .panel {
+      position: absolute;
+      right: 0;
+      top: 0;
+      width: min(460px, 100%);
+      height: 100%;
+      background: var(--panel);
+      border-left: 1px solid var(--ring);
+      transform: translateX(100%);
+      transition: .2s;
+      display: flex;
+      flex-direction: column;
+    }
+    .drawer.show {
+      pointer-events: auto;
+    }
+    .drawer.show .overlay {
+      opacity: 1;
+    }
+    .drawer.show .panel {
+      transform: translateX(0);
+    }
+    .cart {
+      padding: 14px;
+      overflow: auto;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .item {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      border: 1px solid var(--ring);
+      border-radius: 12px;
+      padding: 10px;
+      background: var(--panel2);
+    }
+    .item img {
+      width: 64px;
+      height: 64px;
+      object-fit: cover;
+      border-radius: 10px;
+      border: 1px solid var(--ring);
+    }
+    .tot {
+      border-top: 1px solid var(--ring);
+      padding: 12px;
+      background: #101011;
+    }
+    .line {
+      display: flex;
+      justify-content: space-between;
+      margin: 6px 0;
+    }
+    .input2 {
+      width: 100%;
+      background: var(--panel2);
+      border: 1px solid var(--ring);
+      border-radius: 12px;
+      padding: 10px 12px;
+      color: var(--text);
+    }
+    .note {
+      height: 72px;
+      resize: vertical;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 90px;
+      transform: translateX(-50%);
+      background: #111;
+      border: 1px solid var(--ring);
+      color: #fff;
+      padding: 10px 14px;
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      opacity: 0;
+      transition: .2s;
+      z-index: 70;
+    }
+    .toast.show {
+      opacity: 1;
+    }
+
+    /* Bottom bar */
+    .bar {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 40;
+      background: rgba(10,10,12,0.75);
+      border-top: 1px solid var(--ring);
+      backdrop-filter: blur(8px);
+    }
+    .bar-in {
+      max-width: 980px;
+      margin: 0 auto;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      padding: 8px 12px;
+    }
+    .badge2 {
+      background: var(--accent);
+      color: #fff;
+      font-weight: 900;
+      font-size: 12px;
+      border-radius: 999px;
+      padding: 4px 8px;
+    }
+    .small {
+      font-size: 12px;
+      opacity: .9;
+    }
+    .free {
+      color: #20d47b;
+      font-weight: 800;
+    }
+    .warn {
+      color: #ffb84d;
+      font-weight: 700;
+    }
+    .hr {
+      height: 1px;
+      background: var(--ring);
+      margin: 10px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <!-- Hero -->
+    <section class="hero">
+      <div class="hero-row">
+        <div>
+          <div class="brand">
+            <div class="mark">🐗</div>
+            <div class="brand-title">DOLKI KABANA</div>
+          </div>
+          <div class="h1">Premium Smoked Meat</div>
+          <div class="sub">Брутальні копченості з характером. Без «хімії», тільки дим, час і любов.</div>
+          <div class="pill">🩸 BEST MEAT • BEST MOOD</div>
+        </div>
+        <div class="hero-visual"></div>
+      </div>
+      <div class="controls">
+        <input id="search" class="input" placeholder="Пошук: бастурма, ребра, крильця…" />
+        <select id="cat" class="select">
+          <option value="all">Категорія: Усе</option>
+          <option value="pork">Свинина</option>
+          <option value="poultry">Птиця</option>
+          <option value="snack">Снеки</option>
+          <option value="meat">М’ясо</option>
+        </select>
+      </div>
+      <div class="tabs">
+        <button class="tab active" data-tab="shop">🛒 Shop</button>
+        <button class="tab" data-tab="fav">❤️ Вибране</button>
+        <button class="tab" data-tab="profile">👤 Профіль</button>
+      </div>
+    </section>
+
+    <!-- Product grid -->
+    <section id="grid" class="grid"></section>
+
+    <!-- Profile section -->
+    <section id="profileSec" style="display:none;margin-top:14px">
+      <div class="card" style="padding:14px">
+        <div class="title">Дані покупця</div>
+        <div class="hr"></div>
+        <div style="display:grid;gap:10px;grid-template-columns:1fr 1fr">
+          <input id="name" class="input2" placeholder="Ім’я та Прізвище">
+          <input id="phone" class="input2" placeholder="Телефон (WhatsApp/Telegram)">
+        </div>
+        <div class="hr"></div>
+        <div style="display:flex;gap:10px;align-items:center">
+          <label><input type="radio" name="del" value="delivery" checked> Доставка</label>
+          <label><input type="radio" name="del" value="pickup"> Самовивіз</label>
+        </div>
+        <div id="addrWrap" style="margin-top:10px;display:grid;gap:10px;grid-template-columns:2fr 1fr">
+          <input id="address" class="input2" placeholder="Адреса (вулиця, будинок, під’їзд)">
+          <input id="time" class="input2" placeholder="Час (сьогодні 18:00?)">
+        </div>
+        <div class="hr"></div>
+        <textarea id="note" class="input2 note" placeholder="Коментар до замовлення (необов’язково)"></textarea>
+      </div>
+    </section>
+  </div>
+
+  <!-- Cart Drawer -->
+  <div id="drawer" class="drawer">
+    <div id="overlay" class="overlay"></div>
+    <aside class="panel">
+      <div style="display:flex;align-items:center;gap:10px;padding:12px;border-bottom:1px solid var(--ring)">
+        <strong style="font-size:18px">Ваш кошик</strong>
+        <span id="count" class="muted">(0)</span>
+        <button id="clear" class="btn" style="background:#2a2a2a;border:1px solid var(--ring)">Очистити</button>
+        <button id="close" class="btn" style="margin-left:auto;background:#222;border:1px solid var(--ring)">Закрити</button>
+      </div>
+      <div class="cart" id="cartList"></div>
+      <div class="tot">
+        <div class="line"><span>Промокод</span>
+          <div style="display:flex;gap:8px">
+            <input id="promo" class="input2" style="width:160px" placeholder="MEAT10">
+            <button id="applyPromo" class="btn">Застосувати</button>
+          </div>
+        </div>
+        <div class="line small"><span>Доставка</span><span id="shipText">Розрахунок</span></div>
+        <div class="line"><span>Сума</span><strong id="subtotal">0,00 €</strong></div>
+        <div class="line" style="font-size:18px"><strong>Разом</strong><strong id="total">0,00 €</strong></div>
+        <div id="freeHint" class="small muted"></div>
+        <button id="checkout" class="btn" style="width:100%;margin-top:10px">Надіслати замовлення</button>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast"></div>
+
+  <!-- Bottom bar -->
+  <div class="bar">
+    <div class="bar-in">
+      <span class="muted">У кошику:</span><span id="barQty" class="badge2">0</span>
+      <div style="margin-left:auto;display:flex;gap:10px;align-items:center;background:var(--panel2);border:1px solid var(--ring);padding:8px 12px;border-radius:12px">
+        <span class="muted">Сума</span><strong id="barSum">0,00 €</strong>
+      </div>
+      <button id="open" class="btn">Переглянути кошик</button>
+    </div>
+  </div>
+
+  <script>
+    /* Telegram WebApp SDK fallback for dev mode */
+    (function(){
+      const dev = !window.Telegram || !window.Telegram.WebApp || location.search.includes('dev=1');
+      if(dev){
+        console.log('[DEV] Telegram mock active');
+        window.Telegram = {
+          WebApp: {
+            expand() {},
+            colorScheme: 'dark',
+            HapticFeedback: { impactOccurred() {}, notificationOccurred() {} },
+            MainButton: { show(){}, hide(){}, setText() {} },
+            sendData(data) { alert('🧪 DEV: відправка в бот\n\n' + data); },
+            onEvent() {}
+          }
+        };
+      }
+    })();
+
+    const tg = window.Telegram.WebApp;
+    tg.expand();
+    const vibrate = () => { try { tg.HapticFeedback.impactOccurred('light'); } catch(e){} };
+    const notify = msg => {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.classList.add('show');
+      setTimeout(()=>el.classList.remove('show'), 1400);
+    };
+
+    /* Demo products */
+    const PRODUCTS = [
+      { id: 'basturma', name: 'Бастурма класична', price: 6.90, unit: '100 г', cat: 'meat', img: 'https://images.unsplash.com/photo-1600628421060-939639a5035f?q=80&w=1200&auto=format&fit=crop', desc: 'Сухе в’ялення, добірні спеції, тонкий зріз.' },
+      { id: 'ribs',     name: 'Ребра копчені',     price: 14.50, unit: '1 кг',  cat: 'pork', img: 'https://images.unsplash.com/photo-1553163147-622ab57be1c7?q=80&w=1200&auto=format&fit=crop', desc: 'Соковиті ребра, подвійний дим, легка глазур.' },
+      { id: 'neck',     name: 'Ошийок запечений',  price: 3.90,  unit: '100 г', cat: 'pork', img: 'https://images.unsplash.com/photo-1551024601-bec78aea704b?q=80&w=1200&auto=format&fit=crop', desc: 'Маринад 24 год, запікання low&slow.' },
+      { id: 'wings',    name: 'Крильця гострі',    price: 9.50,  unit: '1 кг',  cat: 'poultry', img: 'https://images.unsplash.com/photo-1604908176997-43162fdf2f1f?q=80&w=1200&auto=format&fit=crop', desc: 'Гострий соус, запікання до хрусту.' },
+      { id: 'quail',    name: 'Перепілка копчена', price: 12.00, unit: '1 шт',  cat: 'poultry', img: 'https://images.unsplash.com/photo-1559767940-86a4f7f24c5c?q=80&w=1200&auto=format&fit=crop', desc: 'Міні-делікатес, ароматна та ніжна.' },
+      { id: 'snack',    name: 'Снеки до пива',     price: 4.50,  unit: 'порція',cat: 'snack', img: 'https://images.unsplash.com/photo-1546549039-49f3bd83f9a2?q=80&w=1200&auto=format&fit=crop', desc: 'Мікс бастурми, горішки, чіпси.' }
+    ];
+    const cfg = { freeFrom: 50, ship: 5 };
+
+    // State: cart, favorites, profile
+    const state = {
+      cart: JSON.parse(localStorage.getItem('dk_cart') || '{}'),
+      fav:  JSON.parse(localStorage.getItem('dk_fav') || '[]'),
+      profile: JSON.parse(localStorage.getItem('dk_profile') || '{"name":"","phone":"","address":"","time":"","delivery":"delivery","note":"","promo":""}')
+    };
+    const fmt = n => n.toLocaleString('de-DE',{ style:'currency', currency:'EUR' });
+
+    // Filtering
+    const gridEl = document.getElementById('grid');
+    const searchEl = document.getElementById('search');
+    const catEl = document.getElementById('cat');
+    let currentTab = 'shop';
+
+    function renderGrid(list) {
+      gridEl.innerHTML = '';
+      list.forEach(p => {
+        const qty = state.cart[p.id]?.qty || 0;
+        const isFav = state.fav.includes(p.id);
+        const card = document.createElement('article');
+        card.className = 'card';
+        card.innerHTML = `
+          <div class="media">
+            <img src="${p.img}" alt="${p.name}">
+            <span class="badge">${p.unit}</span>
+            <button class="fav ${isFav ? 'active' : ''}" data-fav="${p.id}" title="В обрані">${isFav ? '❤️' : '🤍'}</button>
+          </div>
+          <div class="body">
+            <div class="title">${p.name}</div>
+            <div class="small muted" style="margin-top:4px">${p.desc}</div>
+            <div class="row" style="margin-top:8px">
+              <div class="price">${fmt(p.price)}</div>
+              <div class="grow"></div>
+              <div class="qty">
+                <button data-dec="${p.id}">−</button>
+                <strong>${qty}</strong>
+                <button data-inc="${p.id}">+</button>
+              </div>
+            </div>
+          </div>
+        `;
+        gridEl.appendChild(card);
+      });
+    }
+
+    function applyFilter() {
+      const q = searchEl.value.trim().toLowerCase();
+      const c = catEl.value;
+      let list = PRODUCTS.filter(p => (c === 'all' || p.cat === c) && (!q || p.name.toLowerCase().includes(q) || p.desc.toLowerCase().includes(q)));
+      if (currentTab === 'fav') list = list.filter(p => state.fav.includes(p.id));
+      gridEl.style.display = currentTab === 'profile' ? 'none' : '';
+      document.getElementById('profileSec').style.display = currentTab === 'profile' ? '' : 'none';
+      renderGrid(list);
+    }
+    searchEl.addEventListener('input', applyFilter);
+    catEl.addEventListener('change', applyFilter);
+
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        currentTab = tab.dataset.tab;
+        applyFilter();
+      });
+    });
+
+    // Favourite & quantity handlers
+    gridEl.addEventListener('click', e => {
+      const inc = e.target.closest('[data-inc]');
+      const dec = e.target.closest('[data-dec]');
+      const favBtn = e.target.closest('[data-fav]');
+      if (inc) addQty(inc.dataset.inc, +1);
+      if (dec) addQty(dec.dataset.dec, -1);
+      if (favBtn) toggleFav(favBtn.dataset.fav);
+    });
+    function addQty(id, d) {
+      const p = PRODUCTS.find(x => x.id === id);
+      if (!p) return;
+      state.cart[id] = state.cart[id] || { qty: 0, price: p.price, name: p.name, unit: p.unit, img: p.img };
+      state.cart[id].qty += d;
+      if (state.cart[id].qty <= 0) delete state.cart[id];
+      vibrate();
+      update();
+    }
+    function toggleFav(id) {
+      const i = state.fav.indexOf(id);
+      if (i >= 0) state.fav.splice(i, 1); else state.fav.push(id);
+      update();
+    }
+
+    // Save state
+    function save() {
+      localStorage.setItem('dk_cart', JSON.stringify(state.cart));
+      localStorage.setItem('dk_fav', JSON.stringify(state.fav));
+      localStorage.setItem('dk_profile', JSON.stringify(state.profile));
+    }
+
+    // Drawer operations
+    const drawer = document.getElementById('drawer');
+    const overlayEl = document.getElementById('overlay');
+    const openBtn = document.getElementById('open');
+    const closeBtn = document.getElementById('close');
+    const clearBtn = document.getElementById('clear');
+    const cartList = document.getElementById('cartList');
+    const subtotalEl = document.getElementById('subtotal');
+    const totalEl = document.getElementById('total');
+    const countEl = document.getElementById('count');
+    const shipTextEl = document.getElementById('shipText');
+    const promoInput = document.getElementById('promo');
+    const applyPromoBtn = document.getElementById('applyPromo');
+    const freeHint = document.getElementById('freeHint');
+
+    function openDrawer() { drawer.classList.add('show'); }
+    function closeDrawerFn() { drawer.classList.remove('show'); }
+    openBtn.onclick = openDrawer;
+    overlayEl.onclick = closeDrawerFn;
+    closeBtn.onclick = closeDrawerFn;
+    clearBtn.onclick = () => { state.cart = {}; save(); update(); notify('Кошик очищено'); };
+
+    cartList.addEventListener('click', e => {
+      const inc = e.target.closest('[data-inc]');
+      const dec = e.target.closest('[data-dec]');
+      if (inc) addQty(inc.dataset.inc, +1);
+      if (dec) addQty(dec.dataset.dec, -1);
+    });
+
+    applyPromoBtn.onclick = () => {
+      state.profile.promo = promoInput.value.trim();
+      save();
+      update();
+      notify('Промокод застосовано');
+    };
+
+    // Profile bindings
+    const nameInput = document.getElementById('name');
+    const phoneInput = document.getElementById('phone');
+    const addressInput = document.getElementById('address');
+    const timeInput = document.getElementById('time');
+    const noteInput = document.getElementById('note');
+    const delRadios = document.querySelectorAll('input[name="del"]');
+    const addrWrap = document.getElementById('addrWrap');
+    function bindProfile() {
+      nameInput.value = state.profile.name || '';
+      phoneInput.value = state.profile.phone || '';
+      addressInput.value = state.profile.address || '';
+      timeInput.value = state.profile.time || '';
+      noteInput.value = state.profile.note || '';
+      delRadios.forEach(r => { r.checked = r.value === state.profile.delivery; });
+      addrWrap.style.display = state.profile.delivery === 'delivery' ? 'grid' : 'none';
+      promoInput.value = state.profile.promo || '';
+    }
+    [nameInput, phoneInput, addressInput, timeInput, noteInput].forEach(el => {
+      el.addEventListener('input', () => {
+        state.profile[el.id] = el.value;
+        save();
+      });
+    });
+    delRadios.forEach(r => r.addEventListener('change', () => {
+      state.profile.delivery = document.querySelector('input[name="del"]:checked').value;
+      save();
+      update();
+    }));
+
+    // Totals calculation
+    const barQtyEl = document.getElementById('barQty');
+    const barSumEl = document.getElementById('barSum');
+    function totals() {
+      let qty = 0;
+      let sum = 0;
+      Object.values(state.cart).forEach(({ qty: q, price }) => {
+        qty += q;
+        sum += q * price;
+      });
+      let ship = (sum >= cfg.freeFrom || qty === 0 || state.profile.delivery === 'pickup') ? 0 : cfg.ship;
+      let disc = 0;
+      if (state.profile.promo && state.profile.promo.toUpperCase() === 'MEAT10') {
+        disc = Math.min(10, sum * 0.1);
+      }
+      const total = Math.max(0, sum - disc + ship);
+      return { qty, sum, ship, disc, total };
+    }
+
+    function renderCart() {
+      const items = Object.entries(state.cart);
+      cartList.innerHTML = '';
+      if (!items.length) {
+        cartList.innerHTML = '<div class="muted">Кошик порожній.</div>';
+        return;
+      }
+      items.forEach(([id, v]) => {
+        const r = document.createElement('div');
+        r.className = 'item';
+        r.innerHTML = `
+          <img src="${v.img}">
+          <div style="flex:1">
+            <div style="font-weight:800">${v.name}</div>
+            <div class="small muted">${v.unit} • ${fmt(v.price)}</div>
+          </div>
+          <div class="qty">
+            <button data-dec="${id}">−</button>
+            <strong>${v.qty}</strong>
+            <button data-inc="${id}">+</button>
+          </div>
+        `;
+        cartList.appendChild(r);
+      });
+    }
+
+    function update() {
+      applyFilter();
+      renderCart();
+      bindProfile();
+      const t = totals();
+      countEl.textContent = `(${t.qty})`;
+      subtotalEl.textContent = t.disc > 0 ? `${fmt(t.sum)} → ${fmt(t.sum - t.disc)} (-${fmt(t.disc)})` : fmt(t.sum);
+      shipTextEl.innerHTML = t.ship === 0 ? (state.profile.delivery === 'pickup' ? '<span class="free">Самовивіз — 0 €</span>' : '<span class="free">Безкоштовно</span>') : fmt(t.ship);
+      totalEl.textContent = fmt(t.total);
+      barQtyEl.textContent = t.qty;
+      barSumEl.textContent = fmt(t.sum);
+      if (t.qty > 0) {
+        const left = Math.max(0, cfg.freeFrom - t.sum);
+        if (left > 0 && state.profile.delivery === 'delivery') {
+          freeHint.innerHTML = `<span class="warn">Додайте ще на ${fmt(left)}</span> — і доставка буде <span class="free">безкоштовна</span>`;
+        } else {
+          freeHint.innerHTML = `<span class="free">Доставка безкоштовна</span>`;
+        }
+      } else {
+        freeHint.textContent = '';
+      }
+      save();
+    }
+    update();
+
+    // Checkout
+    document.getElementById('checkout').onclick = () => {
+      const error = validate();
+      if (error) { notify(error); return; }
+      const items = Object.entries(state.cart).map(([id, v]) => ({ id, qty: v.qty, price: v.price, name: v.name }));
+      const t = totals();
+      const payload = {
+        items,
+        pricing: { sum: t.sum, discount: t.disc, shipping: t.ship, total: t.total },
+        profile: {
+          name: state.profile.name,
+          phone: state.profile.phone,
+          delivery: state.profile.delivery,
+          address: state.profile.address,
+          time: state.profile.time,
+          note: state.profile.note,
+          promo: state.profile.promo
+        }
+      };
+      tg.sendData(JSON.stringify(payload));
+      vibrate();
+      notify('Відправлено в бот');
+    };
+    function validate() {
+      const t = totals();
+      if (t.qty === 0) return 'Кошик порожній';
+      if (!state.profile.name || state.profile.name.length < 2) return 'Вкажіть ім’я';
+      if (!state.profile.phone || state.profile.phone.replace(/\D/g,'').length < 6) return 'Вкажіть телефон';
+      if (state.profile.delivery === 'delivery' && (!state.profile.address || state.profile.address.length < 3)) return 'Вкажіть адресу';
+      return null;
+    }
+  </script>
+</body>
+</html>
